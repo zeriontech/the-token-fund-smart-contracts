@@ -7,7 +7,7 @@ contract('TokenFund', function(accounts) {
     var ethInvestor = accounts[1];
     var btcInvestor = accounts[2];
 
-    it("Should invest 10 ETH", function(done) {
+    it("Should invest ETH directly and issue tokens", function(done) {
         // TokenFund Contract
         var contract = TokenFund.deployed();
 
@@ -56,7 +56,7 @@ contract('TokenFund', function(accounts) {
         }).then(done);
     });
 
-    it("Should invest 5 ETH via fundBTC()", function(done) {
+    it("Should issue tokens via fundBTC()", function(done) {
         // TokenFund Contract
         var contract = TokenFund.deployed();
 
@@ -88,7 +88,7 @@ contract('TokenFund', function(accounts) {
     var ethInvestor = accounts[1];
     var btcInvestor = accounts[2];
 
-    it("Should check emission lock", function(done) {
+    it("Should check simple transfer and transfer lock", function(done) {
         // TokenFund Contract
         var contract = TokenFund.deployed();
 
@@ -114,6 +114,25 @@ contract('TokenFund', function(accounts) {
                 assert.equal(balance.toNumber(),
                     tokensToTransfer,
                     "New number of tokens for the second investor is incorrect");
+            });
+            return contract.enableTransfers(false, {from: owner});
+        }).then(function(val) {
+            // Check new investor balances
+            return contract.transfer(
+                btcInvestor, // to
+                tokensToTransfer, // count
+                {from: ethInvestor} // Set btc investor as a sender
+            );
+        }).then(function(tx_id) {
+            contract.balanceOf.call(btcInvestor).then(function(balance) {
+                assert.equal(balance.toNumber(),
+                    tokenCount - tokensToTransfer,
+                    "Balance should not have changed for the first investor");
+            });
+            contract.balanceOf.call(ethInvestor).then(function(balance) {
+                assert.equal(balance.toNumber(),
+                    tokensToTransfer,
+                    "Balance should not have changed for the second investor");
             });
         }).then(done);
     });
