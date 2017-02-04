@@ -137,3 +137,37 @@ contract('TokenFund', function(accounts) {
         }).then(done);
     });
 });
+
+contract('TokenFund', function(accounts) {
+    // Owner of the contract
+    var owner = accounts[0];
+    // Regular TokenFund ethInvestor
+    var ethInvestor = accounts[1];
+    var btcInvestor = accounts[2];
+
+    it("Should check emission lock", function(done) {
+        // TokenFund Contract
+        var contract = TokenFund.deployed();
+
+        var tokenCount = 10000;
+
+        return contract.enableEmission(
+            false,
+            {from: owner}
+        ).then(function(tx_id) {
+            // Check new investor balances
+            return contract.fundBTC(
+                btcInvestor, // beneficiary
+                tokenCount, // Number of tokens to issue
+            ).catch(function(err) {
+              // This is expected behavior.
+            });
+        }).then(function(tx_id) {
+            contract.balanceOf.call(btcInvestor).then(function(balance) {
+                assert.equal(balance.toNumber(),
+                    0,
+                    "Investor should not have received any tokens.");
+            });
+        }).then(done);
+    });
+});
