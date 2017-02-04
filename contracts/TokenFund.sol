@@ -2,7 +2,7 @@ pragma solidity ^0.4.6;
 
 import "StandardToken.sol";
 
-/// @title Token contract - Implements Standard Token Interface with HumaniQ features.
+/// @title Token contract - Implements Standard Token Interface for TokenFund.
 /// @author Evgeny Yurtaev - <evgeny@etherionlab.com>
 contract TokenFund is StandardToken {
 
@@ -19,8 +19,8 @@ contract TokenFund is StandardToken {
     address public multisig;
     address public owner = 0x0;
     uint public tokenPrice = 1 finney; // 0.001 ETH
-    // bool emissionEnabled = true;
-    // bool transfersEnabled = true;
+    bool emissionEnabled = true;
+    bool transfersEnabled = true;
 
     /*
      * Modifiers
@@ -59,6 +59,9 @@ contract TokenFund is StandardToken {
         private
         returns (bool)
     {
+        if (emissionEnabled == false) {
+            throw;
+        }
         if (tokenCount == 0) {
             return false;
         }
@@ -101,11 +104,49 @@ contract TokenFund is StandardToken {
     function setTokenPrice(uint valueInWei)
         public
         onlyOwner
-        returns (bool)
     {
         tokenPrice = valueInWei;
-        return true;
     }
+
+    /// @dev Function that enables/disables transfers of token.
+    /// @param value True/False
+    function enableTransfers(bool value)
+        external
+        onlyOwner
+    {
+        transfersEnabled = value;
+    }
+
+    /// @dev Function that enables/disables token emission.
+    /// @param value True/False
+    function enableEmission(bool value)
+        external
+        onlyOwner
+    {
+        emissionEnabled = value;
+    }
+
+    /*
+     * Overriding ERC20 standard token functions to support transfer lock
+     */
+    function transfer(address _to, uint256 _value)
+        returns (bool success)
+    {
+        if (transfersEnabled == true) {
+            return super.transfer(_to, _value);
+        }
+        return false;
+    }
+
+    function transferFrom(address _from, address _to, uint256 _value)
+        returns (bool success)
+    {
+        if (transfersEnabled == true) {
+            return super.transferFrom(_from, _to, _value);
+        }
+        return false;
+    }
+
 
     /// @dev Contract constructor function sets initial token balances.
     /// @param _multisig Address of the owner of TokenFund.
