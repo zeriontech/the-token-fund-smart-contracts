@@ -66,7 +66,7 @@ contract('TokenFund', function(accounts) {
         });
 
         var tokenCount = 10000;
-        // invest 10 ETH using function fund()
+        // invest 10000 Tokens using function fundBTC()
         return contract.fundBTC(
             btcInvestor, // beneficiary
             tokenCount, // Number of tokens to issue
@@ -77,6 +77,44 @@ contract('TokenFund', function(accounts) {
             assert.equal(investorTokenCount.toNumber(),
                 tokenCount,
                 "Wrong number of tokens was given");
+        }).then(done);
+    });
+});
+
+contract('TokenFund', function(accounts) {
+    // Owner of the contract
+    var owner = accounts[0];
+    // Regular TokenFund ethInvestor
+    var ethInvestor = accounts[1];
+    var btcInvestor = accounts[2];
+
+    it("Should check emission lock", function(done) {
+        // TokenFund Contract
+        var contract = TokenFund.deployed();
+
+        var tokenCount = 10000;
+        var tokensToTransfer = 1234;
+        return contract.fundBTC(
+            btcInvestor, // beneficiary
+            tokenCount, // Number of tokens to issue
+        ).then(function(tx_id) {
+            return contract.transfer(
+                ethInvestor, // to
+                tokensToTransfer, // count
+                {from: btcInvestor} // Set btc investor as a sender
+            );
+        }).then(function(tx_id) {
+            // Check new investor balances
+            contract.balanceOf.call(btcInvestor).then(function(balance) {
+                assert.equal(balance.toNumber(),
+                    tokenCount - tokensToTransfer,
+                    "New number of tokens for the first investor is incorrect");
+            });
+            contract.balanceOf.call(ethInvestor).then(function(balance) {
+                assert.equal(balance.toNumber(),
+                    tokensToTransfer,
+                    "New number of tokens for the second investor is incorrect");
+            });
         }).then(done);
     });
 });
