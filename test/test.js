@@ -94,28 +94,31 @@ contract('TokenFund', function(accounts) {
 
         var tokenCount = 10000;
         var tokensToTransfer = 1234;
+
         return contract.fundBTC(
             btcInvestor, // beneficiary
             tokenCount, // Number of tokens to issue
         ).then(function(tx_id) {
+            return contract.balanceOf(btcInvestor);
+        }).then(function(balance) {
+            assert.equal(balance, tokenCount, "Wrong number of tokens was given");
             return contract.transfer(
                 ethInvestor, // to
                 tokensToTransfer, // count
                 {from: btcInvestor} // Set btc investor as a sender
             );
         }).then(function(tx_id) {
-            // Check new investor balances
-            contract.balanceOf.call(btcInvestor).then(function(balance) {
+            return contract.balanceOf.call(btcInvestor);
+        }).then(function(balance) {
                 assert.equal(balance.toNumber(),
                     tokenCount - tokensToTransfer,
                     "New number of tokens for the first investor is incorrect");
-            });
-            contract.balanceOf.call(ethInvestor).then(function(balance) {
+                return contract.balanceOf.call(ethInvestor);
+        }).then(function(balance) {
                 assert.equal(balance.toNumber(),
                     tokensToTransfer,
                     "New number of tokens for the second investor is incorrect");
-            });
-            return contract.enableTransfers(false, {from: owner});
+                return contract.enableTransfers(false, {from: owner});
         }).then(function(val) {
             // Check new investor balances
             return contract.transfer(
@@ -124,16 +127,16 @@ contract('TokenFund', function(accounts) {
                 {from: ethInvestor} // Set btc investor as a sender
             );
         }).then(function(tx_id) {
-            contract.balanceOf.call(btcInvestor).then(function(balance) {
+            return contract.balanceOf.call(btcInvestor)
+        }).then(function(balance) {
                 assert.equal(balance.toNumber(),
                     tokenCount - tokensToTransfer,
                     "Balance should not have changed for the first investor");
-            });
-            contract.balanceOf.call(ethInvestor).then(function(balance) {
+                return contract.balanceOf.call(ethInvestor);
+        }).then(function(balance) {
                 assert.equal(balance.toNumber(),
                     tokensToTransfer,
                     "Balance should not have changed for the second investor");
-            });
         }).then(done);
     });
 });
