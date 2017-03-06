@@ -150,10 +150,10 @@ contract TokenFund is StandardToken {
 
     /// @dev Contract constructor function sets initial token balances.
     /// @param _multisig Address of the owner of TokenFund.
-    function TokenFund(address _multisig)
+    function TokenFund(address _owner, address _multisig)
     {
         totalSupply = 0;
-        owner = msg.sender;
+        owner = _owner;
         multisig = _multisig;
     }
 
