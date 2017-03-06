@@ -1,6 +1,6 @@
 pragma solidity ^0.4.6;
 
-import "StandardToken.sol";
+import "./StandardToken.sol";
 
 /// @title Token contract - Implements Standard Token Interface for TokenFund.
 /// @author Evgeny Yurtaev - <evgeny@etherionlab.com>
