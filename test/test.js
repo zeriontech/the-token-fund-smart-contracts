@@ -57,7 +57,7 @@ contract('TokenFund', function(accounts) {
         }).then(function(ethInvestorTokenCount) {
             // check that investor received correct number of tokens
             assert.closeTo(ethInvestorTokenCount.toNumber(),
-                (web3.toWei(10, "Ether") / tokenPrice),
+                (web3.toWei(10, "Ether") / tokenPrice) * 0.95, // considering 5% fee
                 0.0000001, // possible javascript computational error
                 "Wrong number of tokens was given");
         }).then(done);
@@ -85,7 +85,7 @@ contract('TokenFund', function(accounts) {
         }).then(function(investorTokenCount) {
             // check that investor received correct number of tokens
             assert.equal(investorTokenCount.toNumber(),
-                tokenCount,
+                tokenCount * 0.95,
                 "Wrong number of tokens was given");
         }).then(done);
     });
@@ -105,6 +105,7 @@ contract('TokenFund', function(accounts) {
         var contract;
 
         var tokenCount = 10000;
+        var realTokenCount = tokenCount * 0.95;
         var tokensToTransfer = 1234;
 
         TokenFund.deployed().then(function(instance) {
@@ -116,7 +117,7 @@ contract('TokenFund', function(accounts) {
         }).then(function(tx_id) {
             return contract.balanceOf(btcInvestor);
         }).then(function(balance) {
-            assert.equal(balance, tokenCount, "Wrong number of tokens was given");
+            assert.equal(balance, realTokenCount, "Wrong number of tokens was given");
             return contract.transfer(
                 ethInvestor, // to
                 tokensToTransfer, // count
@@ -126,7 +127,7 @@ contract('TokenFund', function(accounts) {
             return contract.balanceOf.call(btcInvestor);
         }).then(function(balance) {
                 assert.equal(balance.toNumber(),
-                    tokenCount - tokensToTransfer,
+                    realTokenCount - tokensToTransfer,
                     "New number of tokens for the first investor is incorrect");
                 return contract.balanceOf.call(ethInvestor);
         }).then(function(balance) {
@@ -145,7 +146,7 @@ contract('TokenFund', function(accounts) {
             return contract.balanceOf.call(btcInvestor)
         }).then(function(balance) {
                 assert.equal(balance.toNumber(),
-                    tokenCount - tokensToTransfer,
+                    realTokenCount - tokensToTransfer,
                     "Balance should not have changed for the first investor");
                 return contract.balanceOf.call(ethInvestor);
         }).then(function(balance) {
@@ -186,11 +187,98 @@ contract('TokenFund', function(accounts) {
               // This is expected behavior.
             });
         }).then(function(tx_id) {
-            contract.balanceOf.call(btcInvestor).then(function(balance) {
-                assert.equal(balance.toNumber(),
-                    0,
-                    "Investor should not have received any tokens.");
+            return contract.balanceOf.call(btcInvestor);
+        }).then(function(balance) {
+            assert.equal(balance.toNumber(),
+                         0,
+                         "Investor should not have received any tokens.");
+        }).then(done);
+    });
+});
+
+// test referral system
+contract('TokenFund', function(accounts) {
+    // Owner of the contract
+    var owner = accounts[0];
+    // Regular TokenFund ethInvestor
+    var ethInvestor = accounts[1];
+    var btcInvestor = accounts[2];
+
+    it("Should check tokens emission with referral", function(done) {
+        // TokenFund Contract
+        var contract;
+
+        var tokenCount = 10000;
+
+        TokenFund.deployed().then(function(instance) {
+            contract = instance;
+            return contract.setReferral(btcInvestor, ethInvestor, {
+                from: owner
             });
+        }).then(function(tx_id) {
+            return contract.fundBTC(
+                        btcInvestor, // beneficiary
+                        tokenCount // Number of tokens to issue
+                    );
+        }).then(function(tx_id) {
+            return contract.balanceOf.call(btcInvestor);
+        }).then(function(balance) {
+            assert.equal(balance.toNumber(),
+                         tokenCount * 0.95,
+                         "btcInvestor is supposed to receive 95% of issued tokens");
+            return contract.balanceOf.call(ethInvestor);
+        }).then(function(balance) {
+            assert.equal(balance.toNumber(),
+                         tokenCount * 0.03,
+                         "ethInvestor is supposed to receive 3% of issued tokens as referral");
+            return contract.balanceOf.call(owner);
+        }).then(function(balance) {
+             assert.equal(balance.toNumber(),
+                          tokenCount * 0.01,
+                          "owner is supposed to receive 1% of tokens");
+        }).then(done);
+    });
+
+    it("Should check tokens emission without referral", function(done) {
+        // TokenFund Contract
+        var contract;
+
+        var tokenCount = 10000;
+        var btcInvestorBalance;
+        var ethInvestorBalance;
+        var ownerBalance;
+
+        TokenFund.deployed().then(function(instance) {
+            contract = instance;
+            return contract.balanceOf.call(btcInvestor);
+        }).then(function(balance) {
+            btcInvestorBalance = balance.toNumber();
+            return contract.balanceOf.call(ethInvestor);
+        }).then(function(balance) {
+            ethInvestorBalance = balance.toNumber();
+            return contract.balanceOf.call(owner);
+        }).then(function(balance) {
+            ownerBalance = balance.toNumber();
+            return contract.fundBTC(
+                        ethInvestor, // beneficiary
+                        tokenCount // Number of tokens to issue
+                    );
+        }).then(function(tx_id) {
+            return contract.balanceOf.call(btcInvestor);
+        }).then(function(balance) {
+            assert.equal(balance.toNumber(),
+                         btcInvestorBalance,
+                         "btcInvestor is not supposed to receive any tokens");
+            return contract.balanceOf.call(ethInvestor);
+        }).then(function(balance) {
+            assert.equal(balance.toNumber(),
+                         ethInvestorBalance + tokenCount * 0.95,
+                         "ethInvestor is supposed to receive 95% of issued tokens");
+            return contract.balanceOf.call(owner);
+        }).then(function(balance) {
+             assert.equal(balance.toNumber(),
+                          ownerBalance + tokenCount * 0.04,
+                          "owner is supposed to receive 4% of tokens");
         }).then(done);
     });
 });

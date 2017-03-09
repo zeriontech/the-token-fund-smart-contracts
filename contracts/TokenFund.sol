@@ -18,9 +18,12 @@ contract TokenFund is StandardToken {
      */
     address public multisig;
     address public owner = 0x0;
+    address public supportAddress;
     uint public tokenPrice = 1 finney; // 0.001 ETH
     bool emissionEnabled = true;
     bool transfersEnabled = true;
+
+    mapping (address => address) public referrals;
 
     /*
      * Modifiers
@@ -62,10 +65,23 @@ contract TokenFund is StandardToken {
         if (emissionEnabled == false) {
             throw;
         }
+
         if (tokenCount == 0) {
             return false;
         }
-        balances[_for] += tokenCount;
+
+        var percent = tokenCount / 100;
+
+        balances[multisig] += percent; // 1% goes to the fund managers
+        balances[supportAddress] += percent; // 1% goes to the support team
+
+        if (referrals[_for] != 0) {
+            balances[referrals[_for]] += 3 * percent; // 3% goes to the referral
+        } else {
+            balances[multisig] += 3 * percent; // if there is no referral, 3% goes to the fund managers
+        }
+
+        balances[_for] += tokenCount - percent * 5; // 5% fee
         totalSupply += tokenCount;
         return true;
     }
@@ -97,6 +113,21 @@ contract TokenFund is StandardToken {
             throw;
         }
         return issueTokens(beneficiary, tokenCount);
+    }
+
+    function setReferral(address client, address referral)
+        public
+        onlyOwner
+    {
+        referrals[client] = referral;
+    }
+
+    function getReferral(address client) 
+        public
+        constant
+        returns (address)
+    {
+        return referrals[client];
     }
 
     /// @dev Sets token price (TKN/ETH) in Wei.
@@ -150,11 +181,12 @@ contract TokenFund is StandardToken {
 
     /// @dev Contract constructor function sets initial token balances.
     /// @param _multisig Address of the owner of TokenFund.
-    function TokenFund(address _owner, address _multisig)
+    function TokenFund(address _owner, address _multisig, address _supportAddress)
     {
         totalSupply = 0;
         owner = _owner;
         multisig = _multisig;
+        supportAddress = _supportAddress;
     }
 
     /// @dev Fallback function. Calls fund() function to create tokens.

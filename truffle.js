@@ -13,10 +13,10 @@ module.exports = {
         network_id: "default"
     },
     "testnet": {
-	    network_id: 2,  // Official Ethereum test network
+	    network_id: 3,
 	    host: "localhost",
 	    port: 8545
-	}
+	  }
   }
 
 };
