@@ -7,6 +7,11 @@ import "./StandardToken.sol";
 contract TokenFund is StandardToken {
 
     /*
+     * External contracts
+     */
+    address public emissionContractAddress = 0x0;
+
+    /*
      * Token meta data
      */
     string constant public name = "TheToken Fund";
@@ -16,18 +21,22 @@ contract TokenFund is StandardToken {
     /*
      * Storage
      */
-    address public multisig;
     address public owner = 0x0;
-    address public supportAddress;
-    uint public tokenPrice = 1 finney; // 0.001 ETH
     bool emissionEnabled = true;
     bool transfersEnabled = true;
-
-    mapping (address => address) public referrals;
 
     /*
      * Modifiers
      */
+
+    modifier isCrowdfundingContract() {
+        // Only emission address is allowed to proceed.
+        if (msg.sender != emissionContractAddress) {
+            throw;
+        }
+        _;
+    }
+
     modifier onlyOwner() {
         // Only owner is allowed to do this action.
         if (msg.sender != owner) {
@@ -39,6 +48,23 @@ contract TokenFund is StandardToken {
     /*
      * Contract functions
      */
+
+     /// @dev TokenFund emission function.
+    /// @param _for Address of receiver.
+    /// @param tokenCount Number of tokens to issue.
+    function issueTokens(address _for, uint tokenCount)
+        external
+        isCrowdfundingContract
+        returns (bool)
+    {
+        if (emissionEnabled == false) {
+            throw;
+        }
+
+        balances[_for] += tokenCount;
+        totalSupply += tokenCount;
+        return true;
+    }
 
     /// @dev Withdraws tokens for msg.sender.
     /// @param tokenCount Number of tokens to withdraw.
@@ -55,88 +81,14 @@ contract TokenFund is StandardToken {
         return true;
     }
 
-    /// @dev TokenFund emission function.
-    /// @param _for Address of receiver.
-    /// @param tokenCount Number of tokens to issue.
-    function issueTokens(address _for, uint tokenCount)
-        private
-        returns (bool)
-    {
-        if (emissionEnabled == false) {
-            throw;
-        }
-
-        if (tokenCount == 0) {
-            return false;
-        }
-
-        var percent = tokenCount / 100;
-
-        balances[multisig] += percent; // 1% goes to the fund managers
-        balances[supportAddress] += percent; // 1% goes to the support team
-
-        if (referrals[_for] != 0) {
-            balances[referrals[_for]] += 3 * percent; // 3% goes to the referral
-        } else {
-            balances[multisig] += 3 * percent; // if there is no referral, 3% goes to the fund managers
-        }
-
-        balances[_for] += tokenCount - percent * 5; // 5% fee
-        totalSupply += tokenCount;
-        return true;
-    }
-
-    /// @dev Issues tokens for users who made BTC purchases.
-    /// @param beneficiary Address the tokens will be issued to.
-    /// @param tokenCount Number of tokens to issue
-    function fundBTC(address beneficiary, uint tokenCount)
+    /// @dev Function to change address that is allowed to do emission.
+    /// @param newAddress Address of new emission contract.
+    function changeEmissionContractAddress(address newAddress)
         external
         onlyOwner
         returns (bool)
     {
-        return issueTokens(beneficiary, tokenCount);
-    }
-
-    /// @dev Issues tokens for users who made direct ETH payment.
-    function fund()
-        public
-        payable
-        returns (bool)
-    {
-        // Token count is rounded down. Sent ETH should be multiples of baseTokenPrice.
-        address beneficiary = msg.sender;
-        uint tokenCount = msg.value / tokenPrice;
-        uint roundedInvestment = msg.value * tokenPrice;
-
-        // Send change back to user.
-        if (msg.value > roundedInvestment && !beneficiary.send(msg.value - roundedInvestment)) {
-            throw;
-        }
-        return issueTokens(beneficiary, tokenCount);
-    }
-
-    function setReferral(address client, address referral)
-        public
-        onlyOwner
-    {
-        referrals[client] = referral;
-    }
-
-    function getReferral(address client) 
-        public
-        constant
-        returns (address)
-    {
-        return referrals[client];
-    }
-
-    /// @dev Sets token price (TKN/ETH) in Wei.
-    /// @param valueInWei New value.
-    function setTokenPrice(uint valueInWei)
-        public
-        onlyOwner
-    {
-        tokenPrice = valueInWei;
+        emissionContractAddress = newAddress;
     }
 
     /// @dev Function that enables/disables transfers of token.
@@ -180,17 +132,10 @@ contract TokenFund is StandardToken {
 
 
     /// @dev Contract constructor function sets initial token balances.
-    /// @param _multisig Address of the owner of TokenFund.
-    function TokenFund(address _owner, address _multisig, address _supportAddress)
+    /// @param _owner Address of the owner of TokenFund.
+    function TokenFund(address _owner)
     {
         totalSupply = 0;
         owner = _owner;
-        multisig = _multisig;
-        supportAddress = _supportAddress;
-    }
-
-    /// @dev Fallback function. Calls fund() function to create tokens.
-    function () payable {
-        fund();
     }
 }
