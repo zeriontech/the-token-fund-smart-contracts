@@ -22,7 +22,7 @@ contract TokenFund is StandardToken {
      * Storage
      */
     address public owner = 0x0;
-    bool emissionEnabled = true;
+    bool public emissionEnabled = true;
     bool transfersEnabled = true;
 
     /*
@@ -137,5 +137,9 @@ contract TokenFund is StandardToken {
     {
         totalSupply = 0;
         owner = _owner;
+    }
+
+    function transferOwnership(address newOwner) onlyOwner {
+        owner = newOwner;
     }
 }
