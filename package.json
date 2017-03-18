@@ -1,0 +1,30 @@
+{
+  "name": "fund_contract",
+  "version": "1.0.0",
+  "description": "## Dependencies This repository uses Truffle to compile, test and deploy smart contracts.",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/etherionlab/fund_contract.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/etherionlab/fund_contract/issues"
+  },
+  "homepage": "https://github.com/etherionlab/fund_contract#readme",
+  "dependencies": {
+    "bip39": "^2.2.0",
+    "ethereumjs-testrpc": "^3.0.3",
+    "testnet_ethereum_hdwallet": "^0.1.1",
+    "truffle": "^3.1.1",
+    "truffle-default-builder": "^2.0.0",
+    "truffle-hdwallet-provider": "0.0.3"
+  }
+}
