@@ -68,7 +68,7 @@ contract('TokenFund', function(accounts) {
         }).then(done);
     });
 
-    it("Should issue tokens via fundBTC()", function(done) {
+    it("Should issue tokens via addInvestment()", function(done) {
         // TokenFund Contract
         var contract;
         var token;
@@ -84,10 +84,10 @@ contract('TokenFund', function(accounts) {
         }).then(function(balance) {
             // make sure that he doesn't have any tokens so far
             assert.equal(balance.toNumber(), 0, "Not null balance");
-            // invest 10000 Tokens using function fundBTC()
-            return contract.fundBTC(
+            // invest 10000 Tokens using function addInvestment()
+            return contract.addInvestment(
                 btcInvestor, // beneficiary
-                tokenCount // Number of tokens to issue
+                tokenCount * web3.toWei(0.001, "Ether") // value in wei
             )
         }).then(function(tx_id) {
             return token.balanceOf.call(btcInvestor);
@@ -123,9 +123,9 @@ contract('TokenFund', function(accounts) {
             return Fund.deployed();
         }).then(function(instance) {
             contract = instance;
-            return contract.fundBTC(
+            return contract.addInvestment(
                         btcInvestor, // beneficiary
-                        tokenCount // Number of tokens to issue
+                        tokenCount * web3.toWei(0.001, "Ether")
                     );
         }).then(function(tx_id) {
             return token.balanceOf(btcInvestor);
@@ -197,9 +197,9 @@ contract('TokenFund', function(accounts) {
                     );
         }).then(function(tx_id) {
             // Check new investor balances
-            return contract.fundBTC(
+            return contract.addInvestment(
                 btcInvestor, // beneficiary
-                tokenCount // Number of tokens to issue
+                tokenCount * web3.toWei(0.001, "Ether")
             ).catch(function(err) {
               // This is expected behavior.
             });
@@ -237,9 +237,9 @@ contract('TokenFund', function(accounts) {
                 from: owner
             });
         }).then(function(tx_id) {
-            return contract.fundBTC(
+            return contract.addInvestment(
                         btcInvestor, // beneficiary
-                        tokenCount // Number of tokens to issue
+                        tokenCount * web3.toWei(0.001, "Ether")
                     );
         }).then(function(tx_id) {
             return token.balanceOf.call(btcInvestor);
@@ -284,9 +284,9 @@ contract('TokenFund', function(accounts) {
             return token.balanceOf.call(owner);
         }).then(function(balance) {
             ownerBalance = balance.toNumber();
-            return contract.fundBTC(
+            return contract.addInvestment(
                         ethInvestor, // beneficiary
-                        tokenCount // Number of tokens to issue
+                        tokenCount * web3.toWei(0.001, "Ether")
                     );
         }).then(function(tx_id) {
             return token.balanceOf.call(btcInvestor);

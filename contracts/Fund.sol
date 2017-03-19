@@ -1,8 +1,9 @@
 pragma solidity ^0.4.6;
 
 import "./TokenFund.sol";
+import "./owned.sol";
 
-contract Fund {
+contract Fund is owned {
 
 	/*
      * External contracts
@@ -13,23 +14,10 @@ contract Fund {
      * Storage
      */
     address public multisig;
-    address public owner = 0x0;
     address public supportAddress;
     uint public tokenPrice = 1 finney; // 0.001 ETH
 
     mapping (address => address) public referrals;
-
-    /*
-     * Modifiers
-     */
-
-    modifier onlyOwner() {
-        // Only owner is allowed to do this action.
-        if (msg.sender != owner) {
-            throw;
-        }
-        _;
-    }
 
     /*
      * Contract functions
@@ -88,14 +76,15 @@ contract Fund {
 	    return true;
     }
 
-    /// @dev Issues tokens for users who made BTC purchases.
+    /// @dev Issues tokens for users who made investment.
     /// @param beneficiary Address the tokens will be issued to.
-    /// @param tokenCount Number of tokens to issue
-    function fundBTC(address beneficiary, uint tokenCount)
+    /// @param valueInWei investment in wei
+    function addInvestment(address beneficiary, uint valueInWei)
         external
         onlyOwner
         returns (bool)
     {	
+        uint tokenCount = calculateTokens(valueInWei);
     	return issueTokens(beneficiary, tokenCount);
     }
 
@@ -107,7 +96,7 @@ contract Fund {
     {
         // Token count is rounded down. Sent ETH should be multiples of baseTokenPrice.
         address beneficiary = msg.sender;
-        uint tokenCount = msg.value / tokenPrice;
+        uint tokenCount = calculateTokens(msg.value);
         uint roundedInvestment = msg.value * tokenPrice;
 
         // Send change back to user.
@@ -115,6 +104,14 @@ contract Fund {
             throw;
         }
         return issueTokens(beneficiary, tokenCount);
+    }
+
+    function calculateTokens(uint valueInWei)
+        public
+        constant
+        returns (uint)
+    {
+        return valueInWei / tokenPrice;
     }
 
     function setReferral(address client, address referral)
@@ -139,6 +136,13 @@ contract Fund {
         onlyOwner
     {
         tokenPrice = valueInWei;
+    }
+
+    function getTokenPrice()
+        public
+        returns (uint)
+    {
+        return tokenPrice;
     }
 
     /// @dev Contract constructor function
