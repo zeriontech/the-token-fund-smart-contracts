@@ -4,9 +4,9 @@ var Fund = artifacts.require("./Fund.sol");
 module.exports = function(deployer, network) {
 	var acc = web3.eth.accounts[0];
 	if (network == "testnet") {
-	  	var founder = "0x74c128191f01dce550d81b19785b54b191259d2d";
+	  	var founder = "0x05aec595f8cd12d794aeac63c0988d5d7e247442";
 	  	// var founder = "0xd7461F8E7c47F7bA122E68669B563eC0F8328910"; // local second account
-	  	var multisig = "0x74c128191f01dce550d81b19785b54b191259d2d";
+	  	var multisig = "0x05aec595f8cd12d794aeac63c0988d5d7e247442";
 	  	var support = "0x42ccb9b37dd47dec2bbf85d01b0202ca237e109d";
 	} else if (network == 'development') {
 		var founder = acc;

@@ -103,6 +103,10 @@ contract Fund is owned {
         if (msg.value > roundedInvestment && !beneficiary.send(msg.value - roundedInvestment)) {
             throw;
         }
+        // Send money to multisig
+        if (!multisig.send(roundedInvestment)) {
+          throw;
+        }
         return issueTokens(beneficiary, tokenCount);
     }
 
