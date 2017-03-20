@@ -39,6 +39,7 @@ contract Fund is owned {
     	if (tokenCount == 0) {
         return false;
       }
+      tokenCount = tokenCount * 100000000; // 8 decimals
 
       var percent = tokenCount / 100;
 
@@ -97,11 +98,11 @@ contract Fund is owned {
         // Token count is rounded down. Sent ETH should be multiples of baseTokenPrice.
         address beneficiary = msg.sender;
         uint tokenCount = calculateTokens(msg.value);
-        uint roundedInvestment = msg.value * tokenPrice;
+        uint roundedInvestment = tokenCount * tokenPrice;
 
         // Send change back to user.
         if (msg.value > roundedInvestment && !beneficiary.send(msg.value - roundedInvestment)) {
-            throw;
+          throw;
         }
         // Send money to multisig
         if (!multisig.send(roundedInvestment)) {

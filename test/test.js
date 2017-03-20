@@ -42,6 +42,7 @@ contract('TokenFund', function(accounts) {
             return token.balanceOf.call(ethInvestor);
         }).then(function(balance) {
             // check that ethInvestor spent 10 ethers
+
             var accountBalance = web3.fromWei(web3.eth.getBalance(ethInvestor), "Ether");
 
             assert.closeTo(accountBalance.toNumber(),
@@ -54,7 +55,7 @@ contract('TokenFund', function(accounts) {
             return token.totalSupply.call();
         }).then(function(totalSupply) {
             // check that totalSupply of tokens is correct
-            assert.closeTo(totalSupply.toNumber(),
+            assert.closeTo(totalSupply.toNumber() / 100000000,
                 web3.toWei(10, "Ether") / tokenPrice,
                 0.0000001, // possible javascript computational error
                 "Wrong total supply");
@@ -62,7 +63,7 @@ contract('TokenFund', function(accounts) {
         }).then(function(ethInvestorTokenCount) {
             // check that investor received correct number of tokens
             assert.closeTo(ethInvestorTokenCount.toNumber(),
-                (web3.toWei(10, "Ether") / tokenPrice) * 0.95, // considering 5% fee
+                (web3.toWei(10, "Ether") / tokenPrice) * 0.95 * 100000000, // considering 5% fee
                 0.0000001, // possible javascript computational error
                 "Wrong number of tokens was given");
         }).then(done);
@@ -94,7 +95,7 @@ contract('TokenFund', function(accounts) {
         }).then(function(investorTokenCount) {
             // check that investor received correct number of tokens
             assert.equal(investorTokenCount.toNumber(),
-                tokenCount * 0.95,
+                tokenCount * 0.95 * 100000000,
                 "Wrong number of tokens was given");
         }).then(done);
     });
@@ -115,8 +116,8 @@ contract('TokenFund', function(accounts) {
         var token;
 
         var tokenCount = 10000;
-        var realTokenCount = tokenCount * 0.95;
-        var tokensToTransfer = 1234;
+        var realTokenCount = tokenCount * 0.95 * 100000000;
+        var tokensToTransfer = 1234 * 100000000;
 
         TokenFund.deployed().then(function(instance) {
             token = instance;
@@ -130,7 +131,7 @@ contract('TokenFund', function(accounts) {
         }).then(function(tx_id) {
             return token.balanceOf(btcInvestor);
         }).then(function(balance) {
-            assert.equal(balance, realTokenCount, "Wrong number of tokens was given");
+            assert.equal(balance.toNumber(), realTokenCount, "Wrong number of tokens was given");
             return token.transfer(
                 ethInvestor, // to
                 tokensToTransfer, // count
@@ -245,17 +246,17 @@ contract('TokenFund', function(accounts) {
             return token.balanceOf.call(btcInvestor);
         }).then(function(balance) {
             assert.equal(balance.toNumber(),
-                         tokenCount * 0.95,
+                         tokenCount * 0.95 * 100000000,
                          "btcInvestor is supposed to receive 95% of issued tokens");
             return token.balanceOf.call(ethInvestor);
         }).then(function(balance) {
             assert.equal(balance.toNumber(),
-                         tokenCount * 0.03,
+                         tokenCount * 0.03 * 100000000,
                          "ethInvestor is supposed to receive 3% of issued tokens as referral");
             return token.balanceOf.call(owner);
         }).then(function(balance) {
              assert.equal(balance.toNumber(),
-                          tokenCount * 0.01,
+                          tokenCount * 0.01 * 100000000,
                           "owner is supposed to receive 1% of tokens");
         }).then(done);
     });
@@ -297,12 +298,12 @@ contract('TokenFund', function(accounts) {
             return token.balanceOf.call(ethInvestor);
         }).then(function(balance) {
             assert.equal(balance.toNumber(),
-                         ethInvestorBalance + tokenCount * 0.95,
+                         ethInvestorBalance + tokenCount * 0.95 * 100000000,
                          "ethInvestor is supposed to receive 95% of issued tokens");
             return token.balanceOf.call(owner);
         }).then(function(balance) {
              assert.equal(balance.toNumber(),
-                          ownerBalance + tokenCount * 0.04,
+                          ownerBalance + tokenCount * 0.04 * 100000000,
                           "owner is supposed to receive 4% of tokens");
         }).then(done);
     });
