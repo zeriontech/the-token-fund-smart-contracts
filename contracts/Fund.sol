@@ -32,45 +32,45 @@ contract Fund is owned {
         return tokenFund.withdrawTokens(tokenCount);
     }
 
-    function issueTokens(address _for, uint tokenCount) 
+    function issueTokens(address _for, uint tokenCount)
     	private
-    	returns (bool) 
+    	returns (bool)
     {
     	if (tokenCount == 0) {
-            return false;
+        return false;
+      }
+
+      var percent = tokenCount / 100;
+
+      // 1% goes to the fund managers
+      if (!tokenFund.issueTokens(multisig, percent)) {
+        // Tokens could not be issued.
+        throw;
+      }
+
+		  // 1% goes to the support team
+      if (!tokenFund.issueTokens(supportAddress, percent)) {
+        // Tokens could not be issued.
+        throw;
+      }
+
+      if (referrals[_for] != 0) {
+      	// 3% goes to the referral
+      	if (!tokenFund.issueTokens(referrals[_for], 3 * percent)) {
+          // Tokens could not be issued.
+          throw;
         }
-
-        var percent = tokenCount / 100;
-
-        // 1% goes to the fund managers
-        if (!tokenFund.issueTokens(multisig, percent)) {
-            // Tokens could not be issued.
-            throw;
+      } else {
+      	// if there is no referral, 3% goes to the fund managers
+      	if (!tokenFund.issueTokens(multisig, 3 * percent)) {
+          // Tokens could not be issued.
+          throw;
         }
+      }
 
-		// 1% goes to the support team
-        if (!tokenFund.issueTokens(supportAddress, percent)) {
-            // Tokens could not be issued.
-            throw;
-        }
-
-        if (referrals[_for] != 0) {
-        	// 3% goes to the referral
-        	if (!tokenFund.issueTokens(referrals[_for], 3 * percent)) {
-	            // Tokens could not be issued.
-	            throw;
-	        }
-        } else {
-        	// if there is no referral, 3% goes to the fund managers
-        	if (!tokenFund.issueTokens(multisig, 3 * percent)) {
-	            // Tokens could not be issued.
-	            throw;
-	        }
-        }
-
-        if (!tokenFund.issueTokens(_for, tokenCount - 5 * percent)) {
-            // Tokens could not be issued.
-            throw;
+      if (!tokenFund.issueTokens(_for, tokenCount - 5 * percent)) {
+        // Tokens could not be issued.
+        throw;
 	    }
 
 	    return true;
@@ -83,7 +83,7 @@ contract Fund is owned {
         external
         onlyOwner
         returns (bool)
-    {	
+    {
         uint tokenCount = calculateTokens(valueInWei);
     	return issueTokens(beneficiary, tokenCount);
     }
@@ -121,7 +121,7 @@ contract Fund is owned {
         referrals[client] = referral;
     }
 
-    function getReferral(address client) 
+    function getReferral(address client)
         public
         constant
         returns (address)
