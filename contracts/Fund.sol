@@ -150,6 +150,12 @@ contract Fund is owned {
         return tokenPrice;
     }
 
+    function changeMultisig(address newMultisig)
+        onlyOwner
+    {
+        multisig = newMultisig;
+    }
+
     /// @dev Contract constructor function
     /// @param _multisig Address of the owner of TokenFund.
     /// @param _supportAddress Address of the developers team.
