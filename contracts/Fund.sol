@@ -112,11 +112,18 @@ contract Fund is owned {
     }
 
     function calculateTokens(uint valueInWei)
+        constant
+        returns (uint)
+    {
+        return valueInWei * 100000000 / tokenPrice;
+    }
+
+    function estimateTokens(uint valueInWei)
         public
         constant
         returns (uint)
     {
-        return valueInWei * 95000000 / tokenPrice;
+        return calculateTokens() * 0.95;
     }
 
     function setReferral(address client, address referral)
