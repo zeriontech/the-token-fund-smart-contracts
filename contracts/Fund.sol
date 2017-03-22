@@ -123,7 +123,7 @@ contract Fund is owned {
         constant
         returns (uint)
     {
-        return calculateTokens() * 0.95;
+        return valueInWei * 95000000 / tokenPrice;
     }
 
     function setReferral(address client, address referral)
