@@ -111,6 +111,7 @@ contract Fund is owned {
     }
 
     function calculateTokens(uint valueInWei)
+        public
         constant
         returns (uint)
     {
@@ -151,6 +152,7 @@ contract Fund is owned {
 
     function getTokenPrice()
         public
+        constant
         returns (uint)
     {
         return tokenPrice;
