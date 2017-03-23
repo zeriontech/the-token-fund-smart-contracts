@@ -98,7 +98,7 @@ contract Fund is owned {
         // Token count is rounded down. Sent ETH should be multiples of baseTokenPrice.
         address beneficiary = msg.sender;
         uint tokenCount = calculateTokens(msg.value);
-        uint roundedInvestment = tokenCount * tokenPrice;
+        uint roundedInvestment = tokenCount * tokenPrice / 100000000;
 
         // Send change back to user.
         if (msg.value > roundedInvestment && !beneficiary.send(msg.value - roundedInvestment)) {
