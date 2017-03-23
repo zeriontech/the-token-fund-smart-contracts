@@ -39,7 +39,6 @@ contract Fund is owned {
     	if (tokenCount == 0) {
         return false;
       }
-      tokenCount = tokenCount; // 8 decimals
 
       var percent = tokenCount / 100;
 
