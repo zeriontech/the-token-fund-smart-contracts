@@ -12,7 +12,12 @@ module.exports = function(deployer, network) {
 		var founder = acc;
 		var multisig = acc;
 		var support = "0x42ccb9b37dd47dec2bbf85d01b0202ca237e109d";
-	}
+	} else if (network == 'live') {
+    var founder = "0x212de331b2a8c21fcf091c8f3cd13e613bb0af95";
+    var multisig = "0xBA3b826539161A4c3BF681752021847c25A2B46a";
+    // EtherionLab multisig address.
+    var support = "0x9e8fAb94CADA52a584Ec6F10042c3Bb165E79114";
+  }
 
 	var tokenContract;
 
