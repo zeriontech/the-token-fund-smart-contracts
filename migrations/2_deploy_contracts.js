@@ -4,7 +4,6 @@ var Fund = artifacts.require("./Fund.sol");
 module.exports = function(deployer, network) {
 	var acc = web3.eth.accounts[0];
 	var ethAddress = web3.eth.accounts[0];
-  var deploy_from = acc;
 
 	if (network == "testnet") {
   	var founder = "0x05aec595f8cd12d794aeac63c0988d5d7e247442";
@@ -15,8 +14,8 @@ module.exports = function(deployer, network) {
 		var multisig = acc;
 		var support = "0x42ccb9b37dd47dec2bbf85d01b0202ca237e109d";
 	} else if (network == 'live') {
-		var founder = "0x212de331b2a8c21fcf091c8f3cd13e613bb0af95";
-    deploy_from = founder;
+    var acc = "0x212de331b2a8c21fcf091c8f3cd13e613bb0af95";
+		var founder = "0x8cfaa95cad5dddeddcebb350c50757c8fa26711f";
 		// TheToken Fund ethereum address
 		ethAddress = "0xBA3b826539161A4c3BF681752021847c25A2B46a";
     // TheToken Fund multisig address
@@ -27,7 +26,7 @@ module.exports = function(deployer, network) {
 
 	var tokenContract;
 
-	deployer.deploy(TokenFund, deploy_from).then(function() {
+	deployer.deploy(TokenFund, acc).then(function() {
   		return deployer.deploy(Fund, founder, ethAddress, multisig, support, TokenFund.address);
   	}).then(function() {
   		return TokenFund.deployed();
