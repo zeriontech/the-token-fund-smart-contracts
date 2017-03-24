@@ -13,6 +13,7 @@ contract Fund is owned {
 	/*
      * Storage
      */
+    address public ethAddress;
     address public multisig;
     address public supportAddress;
     uint public tokenPrice = 1 finney; // 0.001 ETH
@@ -103,8 +104,8 @@ contract Fund is owned {
         if (msg.value > roundedInvestment && !beneficiary.send(msg.value - roundedInvestment)) {
           throw;
         }
-        // Send money to multisig
-        if (!multisig.send(roundedInvestment)) {
+        // Send money to the fund ethereum address
+        if (!ethAddress.send(roundedInvestment)) {
           throw;
         }
         return issueTokens(beneficiary, tokenCount);
@@ -164,13 +165,21 @@ contract Fund is owned {
         multisig = newMultisig;
     }
 
+    function changeEthAddress(address newEthAddress)
+        onlyOwner
+    {
+        ethAddress = newEthAddress;
+    }
+
     /// @dev Contract constructor function
+    /// @param _ethAddress Ethereum address of the TokenFund.
     /// @param _multisig Address of the owner of TokenFund.
     /// @param _supportAddress Address of the developers team.
     /// @param _tokenAddress Address of the token contract.
-    function Fund(address _owner, address _multisig, address _supportAddress, address _tokenAddress)
+    function Fund(address _owner, address _ethAddress, address _multisig, address _supportAddress, address _tokenAddress)
     {
         owner = _owner;
+        ethAddress = _ethAddress;
         multisig = _multisig;
         supportAddress = _supportAddress;
         tokenFund = TokenFund(_tokenAddress);
