@@ -6,9 +6,9 @@ module.exports = function(deployer, network) {
 	var ethAddress = web3.eth.accounts[0];
 
 	if (network == "testnet") {
-	  	var founder = "0x05aec595f8cd12d794aeac63c0988d5d7e247442";
-	  	var multisig = "0x6E8Ec8a086B485940B435D18303b59b6C35048C1";
-	  	var support = "0xd7461f8e7c47f7ba122e68669b563ec0f8328910";
+  	var founder = "0x05aec595f8cd12d794aeac63c0988d5d7e247442";
+  	var multisig = "0x6E8Ec8a086B485940B435D18303b59b6C35048C1";
+  	var support = "0xd7461f8e7c47f7ba122e68669b563ec0f8328910";
 	} else if (network == 'development') {
 		var founder = acc;
 		var multisig = acc;
@@ -16,16 +16,16 @@ module.exports = function(deployer, network) {
 	} else if (network == 'live') {
 		var founder = "0x212de331b2a8c21fcf091c8f3cd13e613bb0af95";
 		// TheToken Fund ethereum address
-		ethAddress = "0xBA3b826539161A4c3BF681752021847c25A2B46a"
-	    // TheToken Fund multisig address
-	    var multisig = "0x6E8Ec8a086B485940B435D18303b59b6C35048C1";
-	    // EtherionLab multisig address.
-	    var support = "0x9e8fAb94CADA52a584Ec6F10042c3Bb165E79114";
+		ethAddress = "0xBA3b826539161A4c3BF681752021847c25A2B46a";
+    // TheToken Fund multisig address
+    var multisig = "0x6E8Ec8a086B485940B435D18303b59b6C35048C1";
+    // EtherionLab multisig address.
+    var support = "0x9e8fAb94CADA52a584Ec6F10042c3Bb165E79114";
   }
 
 	var tokenContract;
 
-	deployer.deploy(TokenFund, acc).then(function() {
+	deployer.deploy(TokenFund, founder).then(function() {
   		return deployer.deploy(Fund, founder, ethAddress, multisig, support, TokenFund.address);
   	}).then(function() {
   		return TokenFund.deployed();
