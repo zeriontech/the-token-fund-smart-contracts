@@ -16,3 +16,6 @@ Also running node with active json-rpc is required. For testing puproses we sugg
 `truffle compile` - compile all contracts
 
 `truffle test` - run tests
+
+## Contracts on Etherscan
+You can verify the code of the [TKN token contract](https://etherscan.io/address/0x739c71235a9669f6b900490ab1c95310c19abc71) and [The Token Fund contract](https://etherscan.io/address/0xb734c74ff4087493373a27834074f80acbd32827) on Etherscan. 
